@@ -49,7 +49,7 @@ The strategy is to buy an asset and short a more expensive future and hold it ti
 
 ```python
 await execute_commands(
-    ExchangeCurrency(okex, from_currency='USDT', to_currency='BTC', amount=50, in_currency='USD'),
+    ExchangeCurrency(okex, from_currency='USDT', to_currency='BTC', amount=50, in_currency='USDT'),
     SellPosition(okex, symbol='BTC-USDT-220325', amount=50, in_currency='USD')
 )
 ```
@@ -57,14 +57,14 @@ To exit the trade you can run:
 ```python
 await execute_commands(
     ExchangeAllCurrency(okex, from_currency='BTC', to_currency='USDT'),
-    ClosePosition(okex, symbol='BTC-USDT-220325', amount=50, in_currency='USD')
+    ClosePosition(okex, symbol='BTC-USDT-220325')
 )
 ```
 For larger amount to avoid slippage execute a few times:
 ```python
 await execute_commands(
-    ExchangeCurrency(okex, from_currency='BTC', to_currency='USDT', amount=50, in_currency='USD'),
-    BuyPosition(okex, symbol='BTC-USDT-220325', amount=50, in_currency='USD')
+    ExchangeCurrency(okex, from_currency='BTC', to_currency='USDT', amount=50, in_currency='USDT'),
+    BuyPosition(okex, symbol='BTC-USDT-220325', amount=50, in_currency='USDT')
 )
 ```
 For more examples please take a look inside `/tests` directory.
