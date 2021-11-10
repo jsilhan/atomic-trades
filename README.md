@@ -19,9 +19,9 @@ import ccxt.async_support
 from atomic_trades.commands import *
 from atomic_trades.functions import execute_commands
 
-ftx = ccxt.async_support.ftx(**ftx_credentials)
-binance = ccxt.async_support.binance(**binance_credentials)
-okex = ccxt.async_support.okex(**okex_credentials)
+ftx = ccxt.async_support.ftx(ftx_credentials)
+binance = ccxt.async_support.binance(binance_credentials)
+okex = ccxt.async_support.okex(okex_credentials)
 
 await execute_commands(
     ExchangeCurrency(binance, from_currency='ETH', to_currency='XRP', amount=50, in_currency='USD'),
