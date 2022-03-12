@@ -7,10 +7,10 @@ from atomic_trades.functions import evaluate_pre_conditions
 
 class CurrencyConversionTestCase(BaseTestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.exchange = self.create_mocked_exchange(name='FTX')
 
-    async def test_currency_conversion_forward_symbol(self):
+    async def test_currency_conversion_forward_symbol(self) -> None:
         currency_convertor = CurrencyConversion(self.exchange, 'USD', 'LTC')
         command = self.create_command(self.exchange, pre_conditions={currency_convertor})
         assert_false(currency_convertor.is_symbol_reversed)
@@ -20,7 +20,7 @@ class CurrencyConversionTestCase(BaseTestCase):
         assert_equal(failed_conditions, set())
         assert_equal(successful_conditions, set())
 
-    async def test_currency_conversion_reversed_symbol(self):
+    async def test_currency_conversion_reversed_symbol(self) -> None:
         currency_convertor = CurrencyConversion(self.exchange, 'LTC', 'USD')
         command = self.create_command(self.exchange, pre_conditions={currency_convertor})
         assert_true(currency_convertor.is_symbol_reversed)
@@ -30,7 +30,7 @@ class CurrencyConversionTestCase(BaseTestCase):
         assert_equal(failed_conditions, set())
         assert_equal(successful_conditions, set())
 
-    async def test_currency_conversion_same_currency(self):
+    async def test_currency_conversion_same_currency(self) -> None:
         currency_convertor = CurrencyConversion(self.exchange, 'USD', 'USD')
         command = self.create_command(self.exchange, pre_conditions={currency_convertor})
         assert_false(currency_convertor.is_symbol_reversed)

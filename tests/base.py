@@ -3,6 +3,8 @@ from unittest import mock
 
 from atomic_trades.commands import BaseCommand
 from ccxt.base.errors import OrderNotFound
+from typing import Dict, List, Optional, Union
+from unittest.mock import MagicMock
 
 
 BALANCE_DATA = {
@@ -21,7 +23,7 @@ BALANCE_DATA = {
 }
 
 
-async def mocked_fetch_positions_response(*args, **kwargs):
+async def mocked_fetch_positions_response(*args, **kwargs) -> List[Dict[str, Optional[str]]]:
     return [
         {'future': 'ETH-0625',
          'size': '4.242',
@@ -60,43 +62,43 @@ async def mocked_cancel_order_filled_response(*args, **kwargs):
     raise OrderNotFound
 
 
-async def mocked_cancel_order_successful_response(*args, **kwargs):
+async def mocked_cancel_order_successful_response(*args, **kwargs) -> str:
     return 'Order set for cancellation'
 
 
-async def mocked_fetch_order_partially_filled_response(*args, **kwargs):
+async def mocked_fetch_order_partially_filled_response(*args, **kwargs) -> Dict[str, Union[int, float]]:
     return {
         'id': 33,
         'filled': 0.0001
     }
 
 
-async def mocked_fetch_order_open_response(*args, **kwargs):
+async def mocked_fetch_order_open_response(*args, **kwargs) -> Dict[str, int]:
     return {
         'id': 33,
         'filled': 0
     }
 
 
-async def mocked_fetch_order_status_open_response(*args, **kwargs):
+async def mocked_fetch_order_status_open_response(*args, **kwargs) -> str:
     return 'open'
 
 
-async def mocked_fetch_order_status_filled_response(*args, **kwargs):
+async def mocked_fetch_order_status_filled_response(*args, **kwargs) -> str:
     return 'filled'
 
 
-async def mocked_create_order_response(*args, **kwargs):
+async def mocked_create_order_response(*args, **kwargs) -> Dict[str, int]:
     return {
         'id': 33
     }
 
 
-async def mocked_fetch_balance_response(*args, **kwargs):
+async def mocked_fetch_balance_response(*args, **kwargs) -> Dict[str, Dict[str, Union[int, float]]]:
     return BALANCE_DATA
 
 
-async def mocked_fetch_tickers_response(*args, **kwargs):
+async def mocked_fetch_tickers_response(*args, **kwargs) -> Dict[str, Dict[str, Union[int, float]]]:
     return {
         'ETH/USD': {
             'ask': 1528,
@@ -155,7 +157,7 @@ markets_data = {
 
 class BaseTestCase(aiounittest.AsyncTestCase):
 
-    def create_mocked_exchange(self, name):
+    def create_mocked_exchange(self, name: str) -> MagicMock:
         exchange = mock.MagicMock()
         exchange.name = name
         exchange.fetch_balance.side_effect = mocked_fetch_balance_response
@@ -168,7 +170,7 @@ class BaseTestCase(aiounittest.AsyncTestCase):
         exchange.markets = markets_data
         return exchange
 
-    def create_command(self, exchange, pre_conditions=None):
+    def create_command(self, exchange: MagicMock, pre_conditions=None):
         class TestCommand(BaseCommand):
 
             def __init__(self, exchange):

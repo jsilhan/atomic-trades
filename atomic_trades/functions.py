@@ -1,10 +1,15 @@
 import asyncio
 from collections import defaultdict
+from typing import (Any, DefaultDict, Dict, Iterator, List, Optional, Sequence,
+                    Set, Tuple)
 
-from mergedeep import merge, Strategy
+from ccxt.base.exchange import Exchange
+from mergedeep import Strategy, merge
 
-from atomic_trades.exceptions import CommandExecutionError, PreConditionError, PostConditionError
-
+from atomic_trades.commands import BaseCommand
+from atomic_trades.conditions import BaseCCXTCall, BaseCondition
+from atomic_trades.exceptions import (CommandExecutionError,
+                                      PostConditionError, PreConditionError)
 
 __all__ = (
     'evaluate_pre_conditions',
@@ -13,44 +18,51 @@ __all__ = (
 )
 
 
-def _get_aggregated_ccxt_method_calls(conditions_map):
-    ccxt_exchange_methods_map = {}
+def _get_aggregated_ccxt_method_calls(conditions_map: DefaultDict[Exchange, Set[BaseCCXTCall]]
+                                      ) -> Dict[Exchange, Dict[str, Any]]:
+    ccxt_exchange_methods_map: Dict[Exchange, Dict[str, Dict[str, Any]]] = {}
     for exchange, conditions in conditions_map.items():
-        ccxt_methods_map = {}
+        ccxt_methods_map: Dict[str, Dict[str, Any]] = {}
         for condition in conditions:
+            # CCXT method will be called just once with parameters aggregated from other conditions
             merge(ccxt_methods_map, condition.ccxt_methods(), strategy=Strategy.ADDITIVE)
         ccxt_exchange_methods_map[exchange] = ccxt_methods_map
     return ccxt_exchange_methods_map
 
 
-def _get_conditions_map(commands, condition_type):
-    conditions_map = defaultdict(set)
+def _get_conditions_map(commands: Any, condition_type: str) -> DefaultDict[Exchange, Set[BaseCCXTCall]]:
+    conditions_map: DefaultDict[Exchange, Set[BaseCCXTCall]] = defaultdict(set)
     for command in commands:
         conditions = getattr(command, f'{condition_type}_conditions')()
         conditions_map[command.exchange].update(conditions)
     return conditions_map
 
 
-def _exchange_method_iterator(method_calls_map):
+def _exchange_method_iterator(method_calls_map: Dict[Exchange, Dict[str, Dict[str, Any]]]
+                              ) -> Iterator[Tuple[Exchange, str, Dict[str, Any]]]:
     for exchange, method_calls in method_calls_map.items():
         for method_name, method_params in method_calls.items():
             yield (exchange, method_name, method_params)
 
 
-async def _get_ccxt_response(exchange, method_name, method_params):
+async def _get_ccxt_response(exchange: Exchange, method_name: str, method_params: Dict[str, Any]
+                             ) -> Tuple[Exchange, str, Any]:
     if not exchange.markets:
         await exchange.load_markets()
     response = await getattr(exchange, method_name)(**method_params)
     return (exchange, method_name, response)
 
 
-async def _get_parallel_pre_condition_responses(method_calls_map):
+async def _get_parallel_pre_condition_responses(method_calls_map: Dict[Exchange, Dict[str, Any]]
+                                                ) -> List[Tuple[Exchange, str, Dict[str, Any]]]:
     tasks = [_get_ccxt_response(exchange, method_name, method_params)
              for exchange, method_name, method_params in _exchange_method_iterator(method_calls_map)]
     return await asyncio.gather(*tasks, return_exceptions=False)
 
 
-def _evaluate_conditions_from_responses(condition_responses_map, conditions_map):
+def _evaluate_conditions_from_responses(condition_responses_map: DefaultDict[Exchange, Dict[str, Any]],
+                                        conditions_map: DefaultDict[Exchange, Set[BaseCondition]]
+                                        ) -> Tuple[Set[BaseCondition], Set[BaseCondition]]:
     successful = set()
     failed = set()
     for exchange, conditions in conditions_map.items():
@@ -64,13 +76,14 @@ def _evaluate_conditions_from_responses(condition_responses_map, conditions_map)
     return successful, failed
 
 
-async def _evaluate_conditions(commands, condition_type):
+async def _evaluate_conditions(commands: Sequence[BaseCommand], condition_type: str
+                               ) -> Tuple[Set[BaseCondition], Set[BaseCondition]]:
     conditions_map = _get_conditions_map(commands, condition_type)
     method_calls_map = _get_aggregated_ccxt_method_calls(conditions_map)
 
     responses = await _get_parallel_pre_condition_responses(method_calls_map)
 
-    condition_responses_map = defaultdict(dict)
+    condition_responses_map: DefaultDict[Exchange, Dict[str, Any]] = defaultdict(dict)
     for (exchange, method_name, response) in responses:
         condition_responses_map[exchange][method_name] = response
 
@@ -83,13 +96,13 @@ async def _evaluate_conditions(commands, condition_type):
     return successful, failed
 
 
-async def _get_command_futures(commands):
+async def _get_command_futures(commands: Sequence[BaseCommand]) -> List[Optional[Exception]]:
     return await asyncio.gather(
         *[command.execute() for command in commands], return_exceptions=True
     )
 
 
-async def _execute_commands_or_raise_error(commands):
+async def _execute_commands_or_raise_error(commands: Sequence[BaseCommand]) -> None:
     results = await _get_command_futures(commands)
     failed_commands_dict = {}
     for command, error in zip(commands, results):
@@ -99,11 +112,11 @@ async def _execute_commands_or_raise_error(commands):
         raise CommandExecutionError(failed_commands_dict=failed_commands_dict)
 
 
-async def evaluate_pre_conditions(*commands):
+async def evaluate_pre_conditions(*commands: BaseCommand) -> Tuple[Set[BaseCondition], Set[BaseCondition]]:
     return await _evaluate_conditions(commands, 'pre')
 
 
-async def execute_commands(*commands, post_conditions_delay=0.4):
+async def execute_commands(*commands: BaseCommand, post_conditions_delay: float=0.4):
     _, failures = await evaluate_pre_conditions(*commands)
     if failures:
         raise PreConditionError(failed_conditions=failures)
@@ -118,7 +131,7 @@ async def execute_commands(*commands, post_conditions_delay=0.4):
         raise PostConditionError(failed_conditions=failures)
 
 
-async def human_execute_commands_in_sequence(*command_batches, count=1, sleep_secs=0.4,
+async def human_execute_commands_in_sequence(*command_batches: Sequence[BaseCommand], count=1, sleep_secs=0.4,
                                              fail_on_first_batch_precondition=False, fail_on_postconditions=True):
     for execution_count in range(1, count + 1):
         print(f'{execution_count}. execution round started:')
