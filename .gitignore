@@ -1,4 +1,5 @@
 *.pyc
 *.pyo
 .idea/
+.eggs/
 atomic_trades.egg-info
