@@ -3,7 +3,7 @@
 
 """The setup script."""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
@@ -11,7 +11,7 @@ with open('README.md') as readme_file:
 requirements = [
     'mergedeep >= 1.3.4',
     'ccxt == 1.49.61',
-    'aiounittest >= 1.4.1'
+    'aiounittest >= 1.4.1',
 ]
 
 setup(
@@ -28,6 +28,8 @@ setup(
     ],
     description="General purpose library for execution of atomic trades",
     install_requires=requirements,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     license="MIT license",
     long_description=readme,
     include_package_data=True,

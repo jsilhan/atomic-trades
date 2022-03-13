@@ -1,11 +1,11 @@
-import aiounittest
-from unittest import mock
-
-from atomic_trades.commands import BaseCommand
-from ccxt.base.errors import OrderNotFound
 from typing import Dict, List, Optional, Union
+from unittest import mock
 from unittest.mock import MagicMock
 
+import aiounittest
+from ccxt.base.errors import OrderNotFound
+
+from atomic_trades.commands import BaseCommand
 
 BALANCE_DATA = {
     'total': {
