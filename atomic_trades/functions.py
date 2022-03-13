@@ -116,7 +116,7 @@ async def evaluate_pre_conditions(*commands: BaseCommand) -> Tuple[Set[BaseCondi
     return await _evaluate_conditions(commands, 'pre')
 
 
-async def execute_commands(*commands: BaseCommand, post_conditions_delay: float=0.4):
+async def execute_commands(*commands: BaseCommand, post_conditions_delay: float = 0.4):
     _, failures = await evaluate_pre_conditions(*commands)
     if failures:
         raise PreConditionError(failed_conditions=failures)
@@ -131,8 +131,9 @@ async def execute_commands(*commands: BaseCommand, post_conditions_delay: float=
         raise PostConditionError(failed_conditions=failures)
 
 
-async def human_execute_commands_in_sequence(*command_batches: Sequence[BaseCommand], count=1, sleep_secs=0.4,
-                                             fail_on_first_batch_precondition=False, fail_on_postconditions=True):
+async def human_execute_commands_in_sequence(*command_batches: Sequence[BaseCommand], count: int = 1,
+                                             sleep_secs: float = 0.4, fail_on_first_batch_precondition: bool = False,
+                                             fail_on_postconditions: bool = True):
     for execution_count in range(1, count + 1):
         print(f'{execution_count}. execution round started:')
         for batch_count, commands in enumerate(command_batches, start=1):

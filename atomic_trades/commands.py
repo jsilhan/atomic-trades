@@ -43,7 +43,7 @@ class ExecuteOrderTillCommand(BaseCommand):
         self.execute_till = execute_till
 
     async def create_limit_order_with_timeout(self, trading_side: str, symbol: str, amount: Union[int, float],
-                                              params: Optional[Dict[str, bool]]=None) -> None:
+                                              params: Optional[Dict[str, bool]] = None) -> None:
         timeout = self.execute_till
         if timeout != 0:
             # create limit order, wait and then create market taker order if it has not been executed yet
@@ -97,7 +97,7 @@ class BaseExchangeCurrencyCommand(ExecuteOrderTillCommand):
 class ExchangeAllCurrency(BaseExchangeCurrencyCommand):
 
     def __init__(self, exchange: Exchange, from_currency: str, to_currency: str,
-                 execute_till: Union[int, float]=0) -> None:
+                 execute_till: Union[int, float] = 0) -> None:
         super().__init__(exchange, from_currency, to_currency, execute_till)
         self.selling_currency_balance_condition = BalanceCondition(self.exchange, self.from_currency, '>', 0,
                                                                    in_currency=self.to_currency)
@@ -122,7 +122,7 @@ class ExchangeAllCurrency(BaseExchangeCurrencyCommand):
 class ExchangeCurrency(BaseExchangeCurrencyCommand):
 
     def __init__(self, exchange: Exchange, from_currency: str, to_currency: str, amount: int,
-                 in_currency: Optional[str]=None, execute_till: int=0, margin: bool=False) -> None:
+                 in_currency: Optional[str] = None, execute_till: int = 0, margin: bool = False) -> None:
         assert amount > 0, f'amount must be positive number, {amount} given'
         super().__init__(exchange, from_currency, to_currency, execute_till)
         self.amount = amount
@@ -140,7 +140,6 @@ class ExchangeCurrency(BaseExchangeCurrencyCommand):
             self.buying_currency_conversion = CurrencyConversion(
                 self.exchange, from_currency=self.in_currency or self.to_currency, to_currency=self.to_currency
             )
-
 
     def __str__(self):
         in_currency_string = f' {self.in_currency} from' if self.in_currency else ''
@@ -169,8 +168,8 @@ class ExchangeCurrency(BaseExchangeCurrencyCommand):
 
 class BuyPosition(ExecuteOrderTillCommand):
 
-    def __init__(self, exchange: Exchange, symbol: str, amount: int, in_currency: Optional[str]=None,
-                 execute_till: int=0, reduce_only: bool=False) -> None:
+    def __init__(self, exchange: Exchange, symbol: str, amount: int, in_currency: Optional[str] = None,
+                 execute_till: int = 0, reduce_only: bool = False) -> None:
         super().__init__(exchange)
         assert amount > 0, f'amount must be positive number, {amount} given'
         self.set_timeout(execute_till)
@@ -201,9 +200,11 @@ class BuyPosition(ExecuteOrderTillCommand):
 
     async def execute(self) -> None:
         if self.in_currency:
+            fetch_tickers_response = self.pre_condition_responses['fetch_tickers']
             amount_in_buying_currency = self.buying_currency_conversion.convert_amount(self.amount) * (
-            self.pre_condition_responses['fetch_tickers'][self.spot_usd_conversion.converting_symbol]['ask'] /
-            self.pre_condition_responses['fetch_tickers'][self.symbol_position.symbol]['ask'])
+                fetch_tickers_response[self.spot_usd_conversion.converting_symbol]['ask'] /
+                fetch_tickers_response[self.symbol_position.symbol]['ask']
+            )
         else:
             amount_in_buying_currency = self.amount
         await self.create_limit_order_with_timeout(
@@ -218,8 +219,8 @@ class BuyPosition(ExecuteOrderTillCommand):
 
 class SellPosition(ExecuteOrderTillCommand):
 
-    def __init__(self, exchange: Exchange, symbol: str, amount: int, in_currency: Optional[str]=None,
-                 execute_till: int=0) -> None:
+    def __init__(self, exchange: Exchange, symbol: str, amount: int, in_currency: Optional[str] = None,
+                 execute_till: int = 0) -> None:
         super().__init__(exchange)
         assert amount > 0, f'amount must be positive number, {amount} given'
         self.set_timeout(execute_till)
