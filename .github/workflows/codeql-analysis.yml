@@ -1,0 +1,18 @@
+name: Code quality test
+on: [push, pull_request]
+
+jobs:
+  python-lint:
+    runs-on: ubuntu-latest
+    name: CI workflow
+    steps:
+    - name: checkout source repo
+      uses: actions/checkout@v2
+
+    - name: linting
+      uses: alexanderdamiani/pylinter@v1.4.2
+      with:
+        python-root: '.'
+        flake8-flags: '--count --show-source --statistics'
+        fail-on-isort: true
+        requirements-file: requirements_stubs.txt

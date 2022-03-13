@@ -1,8 +1,8 @@
 from nose.tools import assert_equal, assert_false, assert_true
 
-from tests.base import BaseTestCase
 from atomic_trades.commands import CurrencyConversion
 from atomic_trades.functions import evaluate_pre_conditions
+from tests.base import BaseTestCase
 
 
 class CurrencyConversionTestCase(BaseTestCase):
