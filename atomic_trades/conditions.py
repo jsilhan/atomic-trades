@@ -93,7 +93,7 @@ class CurrencyConversionMixin:
                 f'Cannot find ticker to convert {self.from_currency} currency to {self.to_currency} currency'
             )
 
-    def convert_amount(self, amount: Union[int, float], responses: Dict[str, Any]=None) -> Union[int, float]:
+    def convert_amount(self, amount: Union[int, float], responses: Dict[str, Any] = None) -> Union[int, float]:
         if self.from_currency == self.to_currency:
             return amount
         responses = responses or self.responses
@@ -128,7 +128,7 @@ class CurrencyConversion(CurrencyConversionMixin, BaseCCXTCall):
 class BalanceCondition(CurrencyConversionMixin, BaseCondition):
 
     def __init__(self, exchange: Exchange, currency: str, comparator: str, comparable_value: Union[int, float],
-                 in_currency: Optional[str]=None) -> None:
+                 in_currency: Optional[str] = None) -> None:
         self.in_currency = None if in_currency == currency else in_currency
         super().__init__(exchange, comparator, comparable_value, currency, self.in_currency)
         self.currency = currency
@@ -157,7 +157,7 @@ class BalanceCondition(CurrencyConversionMixin, BaseCondition):
 
 class PositionFetch(CurrencyConversionMixin, BaseCCXTCall):
 
-    def __init__(self, exchange: Exchange, symbol: str, in_currency: Optional[str]=None) -> None:
+    def __init__(self, exchange: Exchange, symbol: str, in_currency: Optional[str] = None) -> None:
         self.currency = get_currency_from_symbol(symbol)
         self.in_currency = None if self.currency else in_currency
         self.exchange = exchange
@@ -183,7 +183,7 @@ class PositionFetch(CurrencyConversionMixin, BaseCCXTCall):
 class PositionCondition(BaseCondition, PositionFetch):
 
     def __init__(self, exchange: Exchange, symbol: str, comparator: str, comparable_value: float,
-                 in_currency: Optional[str]=None) -> None:
+                 in_currency: Optional[str] = None) -> None:
         self.currency = get_currency_from_symbol(symbol)
         self.in_currency = None if self.currency else in_currency
         super().__init__(exchange, comparator, comparable_value, symbol, self.in_currency)

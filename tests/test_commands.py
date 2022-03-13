@@ -1,17 +1,18 @@
 from mock import call
 from nose.tools import assert_equal, assert_raises
 
-from tests.base import (BALANCE_DATA, BaseTestCase,
-                        mocked_cancel_order_filled_response,
-                        mocked_fetch_order_status_filled_response, mocked_fetch_order_partially_filled_response)
 from atomic_trades.commands import (BalanceCondition, BaseCommand, BuyPosition,
-                                   ExchangeAllCurrency, ExchangeCurrency,
-                                   SellPosition)
+                                    ExchangeAllCurrency, ExchangeCurrency,
+                                    SellPosition)
 from atomic_trades.conditions import PositionCondition
 from atomic_trades.exceptions import (CommandExecutionError,
-                                     MarketDoesNotExistsError,
-                                     PostConditionError, PreConditionError)
+                                      MarketDoesNotExistsError,
+                                      PostConditionError, PreConditionError)
 from atomic_trades.functions import evaluate_pre_conditions, execute_commands
+from tests.base import (BALANCE_DATA, BaseTestCase,
+                        mocked_cancel_order_filled_response,
+                        mocked_fetch_order_partially_filled_response,
+                        mocked_fetch_order_status_filled_response)
 
 
 class CommandTestCase(BaseTestCase):
@@ -155,7 +156,7 @@ class CommandTestCase(BaseTestCase):
         self.exchange.create_order.assert_called_once_with(symbol='ETH/BTC', type='market', side='sell',
                                                            amount=BALANCE_DATA['free']['ETH'], params={})
 
-    async def test_exchange_all_currency_command_execution_unknown_balance_symbol_raises_pre_condition_error(self) -> None:
+    async def test_exchange_all_currency_command_execution_unknown_symbol_raises_pre_condition_error(self) -> None:
         command = ExchangeAllCurrency(self.exchange, 'SOL', 'USD')
         with assert_raises(PreConditionError) as cm:
             await execute_commands(command)

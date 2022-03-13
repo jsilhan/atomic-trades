@@ -28,8 +28,8 @@ def get_currency_from_symbol(symbol: str) -> str:
     return match.group(1)
 
 
-async def wait_till_order_closed(exchange: Exchange, order_id: int, timeout: float, symbol: Optional[str]=None,
-                                 polling_interval: float=0.3) -> bool:
+async def wait_till_order_closed(exchange: Exchange, order_id: int, timeout: float, symbol: Optional[str] = None,
+                                 polling_interval: float = 0.3) -> bool:
     async def order_state_polling():
         while 1:
             await asyncio.sleep(polling_interval)
