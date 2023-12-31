@@ -37,7 +37,11 @@ The library will proceed with the following steps:
 4. async CCXT calls to get updated available balance on exchanges
 5. checks that balance has been changed according to the trades (can raise error with all unsatisfied conditions)
 
-### Making cash and carry arbitrage trade
+### Making cash-and-carry arbitrage trade
+Good explanation of this strategy is here:
+
+[![Cash-and-carry trade explanation](https://img.youtube.com/vi/Udi8iWZAVg0/0.jpg)](https://www.youtube.com/watch?v=Udi8iWZAVg0)
+
 Let's imagine we have found different price of the BTC future and price of the asset on OKEx exchange.
 
 `BTC/USDT` ticker price is 68554
