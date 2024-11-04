@@ -10,7 +10,7 @@ with open('README.md') as readme_file:
 
 requirements = [
     'mergedeep >= 1.3.4',
-    'ccxt == 1.49.61',
+    'ccxt >= 4.4.26',
     'aiounittest >= 1.4.1',
 ]
 
